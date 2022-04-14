@@ -16,5 +16,13 @@ const productSchema = new mongoose.Schema({
 },
 {
     timestamp: true
-}
-})
+});
+
+//UUID generation
+productSchema.pre('save', function(next){
+    this.uuid = 'PROD' +Crypto.pseudoRandomBytes(6).toString('hex').toUpperCase()
+    console.log(this.uuid);
+    next();
+});
+
+module.exports=mongoose.model('product', productSchema);

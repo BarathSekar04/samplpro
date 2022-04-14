@@ -1,14 +1,21 @@
 const express = require('express');
-const moment = require('moment');
+const cors = require('cors');
+const mongoose = require('mongoose')
+require('dotenv').config()
+const port = process.env.PORT || 8000;
+
+constproductRouter = require('./routes/product.route');
+const userRouter = require('./routes/user.route');
 
 const app = express();
-const port = process.env.PORT || 7000;
+app.use(cors());
 
 app.get("/healthCheck", async(req,res)=>{
     console.log("it works");
     res.send({status: 'Success'})
 })
 
+//mongodb collection
 mongoose.connect(process.env.dbUrl,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -19,7 +26,7 @@ mongoose.connect(process.env.dbUrl,{
     process.exit(1)
 })
 
-qpp.use(express.json());
+app.use(express.json());
 app.use(' ')
 app.listen(port, ()=>{
     console.log("Server started... at 3000 port")
