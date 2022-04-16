@@ -44,6 +44,20 @@ router.get("/getIndiviPro", async(req,res)=>{
     }
 });
 
+//update product details
+router.get("/updateTheProduct", authVerify, async(req,res)=>{
+    try{
+        let condition = {"uuid": req.body.uuid}
+        letupdateData = req.body.updateData;
+        let optrion ={new: true}
+        const data = await productSchema.findOneAndUpdate(condition, updateData, option).exec();
+            return res.status(200).json({'status': 'success', message: "Product details fetched successfully", 'result': productDetails});
+    }catch(error){
+        console.log(error.message);
+        return res.status(400).json({"status": 'failure', 'message': error.message})
+    }
+});
+
 //deletion of product
 router.delete("/deleteIndviPro_uuid", async(req,res)=>{
     try {
@@ -54,6 +68,39 @@ router.delete("/deleteIndviPro_uuid", async(req,res)=>{
         console.log(error.message);
         return res.status(400).json({"status": 'failure', 'message': error.message})
     }
-})
+});
+
+//aggregate 
+router.get("/userBasedProduct", async(req,res)=>{
+    try{
+        let productDetails = await caregorySchema.aggregate([
+            {
+                '$lookup':{
+                    from:'products',
+                    localfield: 'uuid',
+                    foreignField: 'categoryUuid',
+                    as: 'product_details'
+                }
+            },
+            {
+                '$lookup':{
+                    from: 'user',
+                    localField: 'userUuid',
+                    ForeignField: 'uuid',
+                    as: 'user_data'
+                }
+            }
+        ])
+
+        if(productDetails.length > 0){
+            return res.status(200).json({'status': 'success', message: "product details fetched successfully", 'result': productDetails});
+        }else{
+            return res.status(404).json({'status': 'failure', message: "No product detail available"})
+        }
+    } catch(error){
+         console.log(error.message);
+         return res.status(400).json({"status": 'failure', 'message': error.message})
+    }
+});
 
 module.export = router;
