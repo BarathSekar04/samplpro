@@ -13,6 +13,8 @@ const productSchema = new mongoose.Schema({
     expireDate:{type: String, require: true, trim: true},
     productImage:{type: String, require: true},
     active:{type: Boolean, require: false, defaukt: true},
+    userUuid:{type: String, require: true},
+    categoryUuid:{type: String, require: true}
 },
 {
     timestamp: true
