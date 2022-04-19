@@ -1,5 +1,6 @@
 const router = required('express').Router();
 const productSchema = required("../models/product.model");
+const {authSchema} = require("../product/joischema")
 
 // add produst for admin
 router.post('/addproduct', async(req,res)=>{
@@ -75,6 +76,15 @@ router.get("/userBasedProduct", async(req,res)=>{
     try{
         let productDetails = await caregorySchema.aggregate([
             {
+                $match:{
+                    $or:[
+                        {"uuid": req.query,category_uuid},
+                        {"useruuid": req.query,userUuid}
+                    ]
+
+                }
+            },
+            {
                 '$lookup':{
                     from:'products',
                     localfield: 'uuid',
@@ -89,6 +99,35 @@ router.get("/userBasedProduct", async(req,res)=>{
                     ForeignField: 'uuid',
                     as: 'user_data'
                 }
+            },
+            {
+                '$Unwind':{
+                    path:'$product_details',
+                    preserveNullAndEmptyArray: true
+                }
+            },
+            {
+                '$Unwind':{
+                    path:'$user_data',
+                    preserveNullAndEmptyArray: true
+                }
+            },
+            {
+                $project:{
+                    "id": 0,
+                    "CategoryName": 1,
+                    "productDetails.productName": 1,
+                    "user_data.username": 1
+                }
+            },
+            {
+                $sort:{categoryName: -1}
+            },
+            {
+                $skip: parseInt(req.query,skip),
+            },
+            {
+                $limit: parseInt(req.query,limit)
             }
         ])
 
