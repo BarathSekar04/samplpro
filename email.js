@@ -1,11 +1,16 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const ejs = require('ejs');
+const {json} = require('path');
+const sendGrid = require('@sendgrid/mail');
+
+sendGrid.setApiKey(process.env.mailApiKey)
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",
      port: 465,
     auth:{
-        Username: "pinkyAngelQueen@gmail.com",
-        Password: "pinky@123"
+        Username: "gamergopi26@gmail.com",
+        Password: "gopigopi26"
     },
     secure:true,
    
@@ -13,12 +18,29 @@ const transporter = nodemailer.createTransport({
 
 async function mailSending(mailData){
     try{
-        transporter.sendMail(mailData,(err,data)=>{  
+        console.log(mailData.attachments)
+        const data = await ejs.renderFile(join(__dirname,'../templates/', mailData.fileName), mailData,mailData.details)
+        const mailDetails = {
+            from:mailData.from,
+            to:mailData.to,
+            subject:mailData.subject,
+            attachments: mailData.attachments,
+            html:data
+        }
+        await transporter.sendMail(mailDetails,(err,data)=>{  
             if(err){ 
                 console.log("err",err.message)
              }else{
                 console.log("Mail sent successfully")
-                return true
+                return 1
+             }
+        })
+        await sendGrid.send(mailDetails,(err,data)=>{  
+            if(err){ 
+                console.log("err",err.message)
+             }else{
+                console.log("Mail sent successfully")
+                return 1
              }
         })
     }catch(error){
@@ -26,4 +48,7 @@ async function mailSending(mailData){
         process.exit[1];
     }
 }
-module.exports = {mailSending: mailSending}
+module.exports = {
+    mailSending: mailSending,
+    sendMailSending: sendMailSending
+}
